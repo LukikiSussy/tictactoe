@@ -1,0 +1,45 @@
+body {
+    background-color: navajowhite;
+}
+
+#gameContainer {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: grid;
+}
+
+#board {
+    top: -50px;
+    width: 600px;
+    height: 600px;
+    background-color: white;
+    outline: solid 5px black;
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+.cell {
+    width: 200px;
+    height: 200px;
+    background-color: white;
+    outline: solid 3px black;
+    position: relative;
+    background-size:90% 90%;
+    background-repeat: no-repeat;
+    background-position: center; 
+}
+
+.text {
+    min-width: 50px;
+    min-height: 70px;
+    position: relative;
+    text-align: center;
+    font-size: 50px;
+    top: -100px;
+}
