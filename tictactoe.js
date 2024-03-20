@@ -73,7 +73,7 @@ function minimax(aiBoard, turn, depth, x, y) {
     }
 
     var score = 0;
-    wincount = 0;
+    var wincount = 0;
 
     aiBoard[x][y] = turn;
 
@@ -82,10 +82,16 @@ function minimax(aiBoard, turn, depth, x, y) {
         for (let x2 = 0; x2 < 3; x2++) {
             for (let y2 = 0; y2 < 3; y2++) {
                 if (turn == "O" && aiBoard[x2][y2] == " ") {
-                    score = minimax(aiBoard, "X", depth + 1, x2, y2);
+                    var tempScore = minimax(aiBoard, "X", depth + 1, x2, y2);
+                    if(tempScore > 0) wincount++;
+                    score = Math.min(tempScore, score);
+                    score -= wincount
                 }
                 else if (turn == "X" && aiBoard[x2][y2] == " ") {
-                    score = minimax(aiBoard, "O", depth + 1, x2, y2);
+                    var tempScore = minimax(aiBoard, "O", depth + 1, x2, y2);
+                    if(tempScore < 0) wincount++;
+                    score = Math.min(tempScore, score);
+                    score += wincount;
                 }
             }
         }
