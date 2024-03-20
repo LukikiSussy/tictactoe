@@ -56,7 +56,7 @@ function placePieceAI() {
         for (let y = 0; y < 3; y++) {
             if (board[x][y] == " ") {
                 let turnVal = minimax(aiBoard, "O", 0, x, y);
-                console.log(turnVal, x, y)
+                //console.log(turnVal, x, y)
                 if (turnVal >= maxTurnValue) {
                     var maxTurnValue = turnVal;
                     bestMove = [x, y];
@@ -68,64 +68,48 @@ function placePieceAI() {
 }
 
 function minimax(aiBoard, turn, depth, x, y) {
-    if (depth > 5) return 0;
-    //if (depth == 2 || depth == 3) console.log(turn);
+    if (depth >= 5) {
+        return 0;
+    }
 
-    if (turn == "O") {
-        var maxTurnValue = -Infinity;
+    var score = 0;
 
-        for (let x = 0; x < 3; x++) {
-            for (let y = 0; y < 3; y++) {
-                if (aiBoard[x][y] == " ") {
-                    aiBoard[x][y] = "O";
-                    //if (depth == 1 || depth == 2) console.log(`${aiBoard}`);
-                    if (!chceckForWin(aiBoard) == "T") {
-                        aiBoard[x][y] = " ";
-                        return 0 + depth
-                    }
-                    if (chceckForWin(aiBoard) == "O") {
-                        aiBoard[x][y] = " ";
-                        return 20 - depth
-                    }
-                    let turnVal = minimax(aiBoard, "X", depth + 1, x, y);
-                    if (turnVal >= maxTurnValue) {
-                        maxTurnValue = turnVal;
-                    }
-                    aiBoard[x][y] = " ";
+    aiBoard[x][y] = turn;
+
+    var win = chceckForWin(aiBoard)
+    if (!win) {
+        for (let x2 = 0; x2 < 3; x2++) {
+            for (let y2 = 0; y2 < 3; y2++) {
+                if (turn == "O" && aiBoard[x2][y2] == " ") {
+                    score = Math.min(minimax(aiBoard, "X", depth + 1, x2, y2), score);
+                }
+                else if (turn == "X" && aiBoard[x2][y2] == " ") {
+                    score = Math.max(minimax(aiBoard, "O", depth + 1, x2, y2), score)
                 }
             }
         }
     }
     else {
-        var maxTurnValue = Infinity;
+        if (win == "O") {
+            score = 15 - depth;
+        }
 
-        for (let x = 0; x < 3; x++) {
-            for (let y = 0; y < 3; y++) {
-                if (aiBoard[x][y] == " ") {
-                    aiBoard[x][y] = "X";
-                    //if (depth == 1 || depth == 2) console.log(`${aiBoard}`);
-                    if (!chceckForWin(aiBoard) == "T") {
-                        aiBoard[x][y] = " ";
-                        return 0 - depth
-                    }
-                    if (chceckForWin(aiBoard) == "X") {
-                        aiBoard[x][y] = " ";
-                        return -20 + depth
-                    }
-                    let turnVal = minimax(aiBoard, "O", depth + 1, x, y);
-                    if (turnVal <= maxTurnValue) {
-                        maxTurnValue = turnVal;
-                    }
-                    aiBoard[x][y] = " ";
-                }
-            }
+        if (win == "X") {
+            score = -15 + depth;
+        }
+
+        if (win == "T") {
+            score == 0;
         }
     }
 
-    return maxTurnValue;
+    aiBoard[x][y] = " ";
+    return score;
+
 }
 
 function drawSimbol(simbol, x, y) {
+    if(globalWinner) return;
     if (board[x][y] == " ") {
         board[x][y] = simbol;
         avalable--;
@@ -144,7 +128,7 @@ function drawSimbol(simbol, x, y) {
 }
 
 function chceckForWin(boardTemp) {
-    var winner = null;
+    var winner = false;
 
     //vertical
     for (let i = 0; i < 3; i++) {
@@ -174,11 +158,7 @@ function chceckForWin(boardTemp) {
         winner = "T";
     }
 
-    if (winner != null) {
-        return winner
-    }
-
-    return false;
+    return winner
 }
 
 function isEqual(a, b, c) {
