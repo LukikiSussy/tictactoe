@@ -68,11 +68,12 @@ function placePieceAI() {
 }
 
 function minimax(aiBoard, turn, depth, x, y) {
-    if (depth >= 5) {
+    if (depth >= 9) {
         return 0;
     }
 
     var score = 0;
+    wincount = 0;
 
     aiBoard[x][y] = turn;
 
@@ -81,10 +82,10 @@ function minimax(aiBoard, turn, depth, x, y) {
         for (let x2 = 0; x2 < 3; x2++) {
             for (let y2 = 0; y2 < 3; y2++) {
                 if (turn == "O" && aiBoard[x2][y2] == " ") {
-                    score = Math.min(minimax(aiBoard, "X", depth + 1, x2, y2), score);
+                    score = minimax(aiBoard, "X", depth + 1, x2, y2);
                 }
                 else if (turn == "X" && aiBoard[x2][y2] == " ") {
-                    score = Math.max(minimax(aiBoard, "O", depth + 1, x2, y2), score)
+                    score = minimax(aiBoard, "O", depth + 1, x2, y2);
                 }
             }
         }
@@ -99,7 +100,7 @@ function minimax(aiBoard, turn, depth, x, y) {
         }
 
         if (win == "T") {
-            score == 0;
+            score == 10;
         }
     }
 
