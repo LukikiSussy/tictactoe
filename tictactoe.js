@@ -13,14 +13,13 @@ const turnObj = {
 
 var board = [];
 
-var avalable = 9;
-
 for (let x = 0; x < 3; x++) {
     board[x] = [];
     for (let y = 0; y < 3; y++) {
         board[x][y] = " ";
     }
 }
+//placePieceAI();
 
 function placePiece(index) {
     if (globalWinner) return;
@@ -35,7 +34,7 @@ function placePiece(index) {
         }
     }
     else {
-        console.log(board[x][y])
+        console.log(x,y)
     }
 }
 
@@ -56,7 +55,7 @@ function placePieceAI() {
         for (let y = 0; y < 3; y++) {
             if (board[x][y] == " ") {
                 let turnVal = minimax(aiBoard, "O", 0, x, y);
-                //console.log(turnVal, x, y)
+                console.log(turnVal, x, y)
                 if (turnVal >= maxTurnValue) {
                     var maxTurnValue = turnVal;
                     bestMove = [x, y];
@@ -64,34 +63,32 @@ function placePieceAI() {
             }
         }
     }
+    console.log(bestMove)
     drawSimbol("O", bestMove[0], bestMove[1]);
 }
 
 function minimax(aiBoard, turn, depth, x, y) {
-    if (depth >= 9) {
+    if (depth >= 10 || emptySquares(aiBoard) < 0) {
         return 0;
     }
 
     var score = 0;
-    var wincount = 0;
 
     aiBoard[x][y] = turn;
 
     var win = chceckForWin(aiBoard)
+    //console.log(`${aiBoard}`)
+    //console.log(win)
     if (!win) {
         for (let x2 = 0; x2 < 3; x2++) {
             for (let y2 = 0; y2 < 3; y2++) {
                 if (turn == "O" && aiBoard[x2][y2] == " ") {
                     var tempScore = minimax(aiBoard, "X", depth + 1, x2, y2);
-                    if(tempScore > 0) wincount++;
                     score = Math.min(tempScore, score);
-                    score -= wincount
                 }
                 else if (turn == "X" && aiBoard[x2][y2] == " ") {
                     var tempScore = minimax(aiBoard, "O", depth + 1, x2, y2);
-                    if(tempScore < 0) wincount++;
-                    score = Math.min(tempScore, score);
-                    score += wincount;
+                    score = Math.max(tempScore, score);
                 }
             }
         }
@@ -101,12 +98,12 @@ function minimax(aiBoard, turn, depth, x, y) {
             score = 15 - depth;
         }
 
-        if (win == "X") {
+        else if (win == "X") {
             score = -15 + depth;
         }
 
-        if (win == "T") {
-            score == 10;
+        else if (win == "T") {
+            score = 10;
         }
     }
 
@@ -119,7 +116,6 @@ function drawSimbol(simbol, x, y) {
     if(globalWinner) return;
     if (board[x][y] == " ") {
         board[x][y] = simbol;
-        avalable--;
         cell = document.getElementById(`${x}-${y}`);
         if (simbol == 'X') {
             cell.style.backgroundImage = "url(https://cdn-icons-png.flaticon.com/512/75/75519.png)";
@@ -161,13 +157,25 @@ function chceckForWin(boardTemp) {
     }
 
     //tie
-    if (winner == null && avalable == 0) {
+    if (winner == false && emptySquares(boardTemp) <= 0) {
         winner = "T";
     }
+
+    //console.log(emptySquares(boardTemp), winner, boardTemp + "")
 
     return winner
 }
 
 function isEqual(a, b, c) {
     if (a == b && b == c && a != " ") return true
+}
+
+function emptySquares(tempBoard) {
+    var i = 0;
+    tempBoard.forEach(line => {
+        line.forEach(sq => {
+            if (sq == " ") i++;
+        });
+    });
+    return i;
 }
