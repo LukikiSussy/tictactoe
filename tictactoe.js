@@ -2,7 +2,7 @@
 // https://cdn-icons-png.flaticon.com/512/105/105152.png
 
 const player1AI = false; // x
-const player2AI = false; // O
+const player2AI = true; // O
 
 var turn = "X";
 var globalWinner = false;
@@ -12,8 +12,13 @@ const turnObj = {
     O: "X"
 }
 
-const height = 10;
-const width = 10;
+const height = 6;
+const width = 6;
+
+const maxDepth = 4;
+
+
+const penaltyAdd = Math.round(Math.sqrt(height) * Math.sqrt(width))/2;
 
 var board = [];
 for (let x = 0; x < width; x++) {
@@ -30,7 +35,7 @@ for (let y = 0; y < height; y++) {
         let cell = document.createElement("td");
         cell.id = `${x}-${y}`;
         cell.classList.add("cell");
-        cell.onclick = function() {
+        cell.onclick = function () {
             placePiece(`${x}-${y}`)
         }
         row.appendChild(cell);
@@ -42,7 +47,7 @@ game();
 
 function game() {
     if (globalWinner) return;
-    if(player1AI && turn == "X" || player2AI && turn == "O") {
+    if (player1AI && turn == "X" || player2AI && turn == "O") {
         setTimeout(() => {
             placePieceAI();
             game();
@@ -51,7 +56,6 @@ function game() {
 }
 
 function placePiece(index) {
-    console.log(index)
     if (globalWinner || player1AI && turn == "X" || player2AI && turn == "O") return;
     var x = index[0];
     var y = index[2];
@@ -74,83 +78,30 @@ function placePieceAI() {
         }
     }
 
-    var maxTurnValue = -Infinity;
+    let bestMove = minimax(aiBoard, turn, 0);
 
-    let bestMove = minimax2(aiBoard, turn);
-
-    console.log(bestMove)
     drawSimbol(turn, bestMove.index);
     turn = turnObj[turn];
 }
 
-function minimax1(aiBoard, turn) {
-
-    var move = {};
-    
+function minimax(aiBoard, turn, depth) {
 
     var win = chceckForWin(aiBoard)
 
     if (win == "O") {
-        move.score = 10;
+        return { score: height * height };
     }
 
     else if (win == "X") {
-        move.score = -10;
+        return { score: -(height * height) };
     }
 
-    else if (win == "T" || emptySquares(aiBoard) < 0) {
-        move.score = 0;
-    }
-
-    //console.log(`${aiBoard}`)
-    //console.log(win)
-    for (let x2 = 0; x2 < width; x2++) {
-        for (let y2 = 0; y2 < height; y2++) {
-            if (aiBoard[x2][y2] == " ") {
-
-                aiBoard[x2][y2] = turn;
-
-                if (turn == "O") {
-                    var tempScore = minimax1(aiBoard, "X").score;
-                    if (tempScore < move.score || !move.score) {
-                        move.score = tempScore;
-                        move.index = [x2, y2];
-                    }
-                }
-                else if (turn == "X") {
-                    var tempScore = minimax1(aiBoard, "O").score;
-                    if (tempScore > move.score || !move.score) {
-                        move.score = tempScore;
-                        move.index = [x2, y2];
-                    }
-                }
-
-                aiBoard[x2][y2] = " ";
-            }
-        }
-    }
-
-
-    return move;
-}
-
-function minimax2(aiBoard, turn) {
-
-    var win = chceckForWin(aiBoard)
-
-    if (win == "O") {
-        return { score: 10 };
-    }
-
-    else if (win == "X") {
-        return { score: -10 };
-    }
-
-    else if (win == "T" || emptySquares(aiBoard) < 0) {
+    else if (win == "T" || depth >= maxDepth) {
         return { score: 0 };
     }
 
     var moves = [];
+    var penalty = 0;
     for (let x2 = 0; x2 < width; x2++) {
         for (let y2 = 0; y2 < height; y2++) {
             if (aiBoard[x2][y2] == " ") {
@@ -160,11 +111,17 @@ function minimax2(aiBoard, turn) {
                 aiBoard[x2][y2] = turn;
 
                 if (turn == "O") {
-                    var result = minimax2(aiBoard, "X");
+                    var result = minimax(aiBoard, "X", depth + 1);
                     move.score = result.score;
+                    if (move.score > 0) {
+                        penalty += penaltyAdd;
+                    }
                 } else {
-                    var result = minimax2(aiBoard, "O");
+                    var result = minimax(aiBoard, "O", depth + 1);
                     move.score = result.score;
+                    if (move.score < 0) {
+                        penalty += penaltyAdd;
+                    }
                 }
 
                 aiBoard[x2][y2] = " ";
@@ -174,13 +131,16 @@ function minimax2(aiBoard, turn) {
         }
     }
 
+    if(depth==0)     console.log(moves);
     var bestMove;
-    if (turn === "O") {
+    if (turn == "O") {
         var bestScore = -10000;
         for (var i = 0; i < moves.length; i++) {
             if (moves[i].score > bestScore) {
                 bestScore = moves[i].score;
                 bestMove = i;
+                moves[bestMove].score += penalty;
+                
             }
         }
     } else {
@@ -189,6 +149,7 @@ function minimax2(aiBoard, turn) {
             if (moves[i].score < bestScore) {
                 bestScore = moves[i].score;
                 bestMove = i;
+                moves[bestMove].score += penalty;
             }
         }
     }
@@ -205,7 +166,6 @@ function drawSimbol(simbol, pos) {
     if (board[x][y] == " ") {
         board[x][y] = simbol;
         cell = document.getElementById(`${x}-${y}`);
-        console.log(`${x}-${y}`)
         if (simbol == 'X') {
             cell.style.backgroundImage = "url(https://cdn-icons-png.flaticon.com/512/75/75519.png)";
         }
@@ -223,10 +183,27 @@ function chceckForWin(boardTemp) {
     var winner = false;
 
     //vertical
-    for (let x = 0; x < width-3; x++) {
-        for (let y = 0; y < height-3; y++) {
-            if (isEqual(boardTemp[x][y], boardTemp[x][y+1], boardTemp[x][y+2], boardTemp[x][y+3])) {
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height - 3; y++) {
+            if (isEqual(boardTemp[x][y], boardTemp[x][y + 1], boardTemp[x][y + 2], boardTemp[x][y + 3])) {
                 winner = boardTemp[x][y];
+            }
+
+            if (isEqual(boardTemp[y][x], boardTemp[y + 1][x], boardTemp[y + 2][x], boardTemp[y + 3][x])) {
+                winner = boardTemp[y][x];
+            }
+        }
+    }
+
+    //diagonal
+    for (let x = 0; x < width - 3; x++) {
+        for (let y = 0; y < height - 3; y++) {
+            if (isEqual(boardTemp[x][y], boardTemp[x + 1][y + 1], boardTemp[x + 2][y + 2], boardTemp[x + 3][y + 3])) {
+                winner = boardTemp[x][y];
+            }
+
+            if (isEqual(boardTemp[x][y + 3], boardTemp[x + 1][y + 2], boardTemp[x + 2][y + 1], boardTemp[x + 3][y])) {
+                winner = boardTemp[x][y + 3];
             }
         }
     }
