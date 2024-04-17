@@ -12,13 +12,13 @@ const turnObj = {
     O: "X"
 }
 
-const height = 6;
-const width = 6;
+const height = 7;
+const width = 7;
 
 const maxDepth = 4;
 
 
-const penaltyAdd = Math.round(Math.sqrt(height) * Math.sqrt(width))/2;
+const penaltyAdd = Math.round(Math.sqrt(height) * Math.sqrt(width)) / 2;
 
 var board = [];
 for (let x = 0; x < width; x++) {
@@ -87,16 +87,18 @@ function placePieceAI() {
 function minimax(aiBoard, turn, depth) {
 
     var win = chceckForWin(aiBoard)
-
+    var depthOffset = Math.floor((1-(emptySquares(board)/(width*height))))
+    if (depth == 0) 
+        console.log(depthOffset)
     if (win == "O") {
-        return { score: height * height };
+        return { score: width * height-depth };
     }
 
     else if (win == "X") {
-        return { score: -(height * height) };
+        return { score: -(width * height)+depth };
     }
 
-    else if (win == "T" || depth >= maxDepth) {
+    else if (win == "T" || depth >= maxDepth + depthOffset) {
         return { score: 0 };
     }
 
@@ -113,15 +115,15 @@ function minimax(aiBoard, turn, depth) {
                 if (turn == "O") {
                     var result = minimax(aiBoard, "X", depth + 1);
                     move.score = result.score;
-                    if (move.score > 0) {
+                    /*if (move.score > 0) {
                         penalty += penaltyAdd;
-                    }
+                    }*/
                 } else {
                     var result = minimax(aiBoard, "O", depth + 1);
                     move.score = result.score;
-                    if (move.score < 0) {
+                    /*if (move.score < 0) {
                         penalty += penaltyAdd;
-                    }
+                    }*/
                 }
 
                 aiBoard[x2][y2] = " ";
@@ -131,7 +133,13 @@ function minimax(aiBoard, turn, depth) {
         }
     }
 
-    if(depth==0)     console.log(moves);
+    if (depth == 0) {
+        for (let i = 0; i < moves.length; i++) {
+            if (board[moves[i].index[0]][moves[i].index[1]] == " ")
+                document.getElementById(`${moves[i].index[0]}-${moves[i].index[1]}`).innerHTML = moves[i].score;
+        }
+    }
+    
     var bestMove;
     if (turn == "O") {
         var bestScore = -10000;
@@ -140,7 +148,7 @@ function minimax(aiBoard, turn, depth) {
                 bestScore = moves[i].score;
                 bestMove = i;
                 moves[bestMove].score += penalty;
-                
+
             }
         }
     } else {
@@ -184,26 +192,26 @@ function chceckForWin(boardTemp) {
 
     //vertical
     for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height - 3; y++) {
-            if (isEqual(boardTemp[x][y], boardTemp[x][y + 1], boardTemp[x][y + 2], boardTemp[x][y + 3])) {
+        for (let y = 0; y < height - 4; y++) {
+            if (isEqual(boardTemp[x][y], boardTemp[x][y + 1], boardTemp[x][y + 2], boardTemp[x][y + 3], boardTemp[x][y + 4])) {
                 winner = boardTemp[x][y];
             }
 
-            if (isEqual(boardTemp[y][x], boardTemp[y + 1][x], boardTemp[y + 2][x], boardTemp[y + 3][x])) {
+            if (isEqual(boardTemp[y][x], boardTemp[y + 1][x], boardTemp[y + 2][x], boardTemp[y + 3][x], boardTemp[y + 4][x])) {
                 winner = boardTemp[y][x];
             }
         }
     }
 
     //diagonal
-    for (let x = 0; x < width - 3; x++) {
-        for (let y = 0; y < height - 3; y++) {
-            if (isEqual(boardTemp[x][y], boardTemp[x + 1][y + 1], boardTemp[x + 2][y + 2], boardTemp[x + 3][y + 3])) {
+    for (let x = 0; x < width - 4; x++) {
+        for (let y = 0; y < height - 4; y++) {
+            if (isEqual(boardTemp[x][y], boardTemp[x + 1][y + 1], boardTemp[x + 2][y + 2], boardTemp[x + 3][y + 3], boardTemp[x + 4][y + 4])) {
                 winner = boardTemp[x][y];
             }
 
-            if (isEqual(boardTemp[x][y + 3], boardTemp[x + 1][y + 2], boardTemp[x + 2][y + 1], boardTemp[x + 3][y])) {
-                winner = boardTemp[x][y + 3];
+            if (isEqual(boardTemp[x][y + 4], boardTemp[x + 1][y + 3], boardTemp[x + 2][y + 2], boardTemp[x + 3][y+1], boardTemp[x + 4][y])) {
+                winner = boardTemp[x][y + 4];
             }
         }
     }
@@ -218,8 +226,8 @@ function chceckForWin(boardTemp) {
     return winner
 }
 
-function isEqual(a, b, c, d) {
-    if (a == b && b == c && c == d && a != " ") return true
+function isEqual(a, b, c, d, e) {
+    if (a == b && b == c && c == d && d == e && a != " ") return true
 }
 
 function emptySquares(tempBoard) {
