@@ -12,10 +12,12 @@ const turnObj = {
     O: "X"
 }
 
-const height = 7;
-const width = 7;
+const height = 5;
+const width = 5;
 
-const maxDepth = 4;
+const maxDepth = 5;
+
+var round = 0;
 
 
 const penaltyAdd = Math.round(Math.sqrt(height) * Math.sqrt(width)) / 2;
@@ -62,6 +64,7 @@ function placePiece(index) {
     if (board[x][y] == " ") {
         drawSimbol(turn, [x, y]);
         turn = turnObj[turn];
+        round++;
         game();
     }
     else {
@@ -90,15 +93,15 @@ function placePieceAI() {
 function minimax(aiBoard, turn, depth, alpha, beta) {
 
     var win = chceckForWin(aiBoard)
-    var depthOffset = Math.floor((1-(emptySquares(board)/(width*height))))
-    if (depth == 0) 
+    var depthOffset = Math.floor((1 - (emptySquares(board) / (width * height))))
+    if (depth == 0)
         console.log(depthOffset)
     if (win == "O") {
-        return { score: width * height-depth };
+        return { score: width * height - depth };
     }
 
     else if (win == "X") {
-        return { score: -(width * height)+depth };
+        return { score: -(width * height) + depth };
     }
 
     else if (win == "T" || depth >= maxDepth + depthOffset) {
@@ -114,32 +117,40 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
                 var move = {};
                 move.index = [x2, y2];
                 aiBoard[x2][y2] = turn;
+                round++;
 
                 if (turn == "O") {  //maximizing
                     var result = minimax(aiBoard, "X", depth + 1, alpha, beta);
-                    alpha = Math.max(result, alpha)
+
                     move.score = result.score;
 
-                    if(alpha > beta) {
+                    if (alpha > beta) {
                         break;
                     }
-                } else {  //minimizing
+
+                    alpha = Math.max(result, alpha);
+
+                }
+                else {  //minimizing
                     var result = minimax(aiBoard, "O", depth + 1, alpha, beta);
-                    beta = Math.min(result, beta)
+
                     move.score = result.score;
 
-                    if(beta < alpha) {
+                    if (beta < alpha) {
                         break;
                     }
+
+                    beta = Math.min(result, beta);
                 }
 
                 aiBoard[x2][y2] = " ";
+                round--;
 
                 moves.push(move);
             }
         }
     }
-    
+
     var bestMove;
     if (turn == "O") {
         var bestScore = -Infinity;
@@ -188,6 +199,7 @@ function drawSimbol(simbol, pos) {
 }
 
 function chceckForWin(boardTemp) {
+    if(round < 10) return false;
     var winner = false;
 
     //vertical
@@ -210,7 +222,7 @@ function chceckForWin(boardTemp) {
                 winner = boardTemp[x][y];
             }
 
-            if (isEqual(boardTemp[x][y + 4], boardTemp[x + 1][y + 3], boardTemp[x + 2][y + 2], boardTemp[x + 3][y+1], boardTemp[x + 4][y])) {
+            if (isEqual(boardTemp[x][y + 4], boardTemp[x + 1][y + 3], boardTemp[x + 2][y + 2], boardTemp[x + 3][y + 1], boardTemp[x + 4][y])) {
                 winner = boardTemp[x][y + 4];
             }
         }
