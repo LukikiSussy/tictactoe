@@ -2,7 +2,7 @@
 // https://cdn-icons-png.flaticon.com/512/105/105152.png
 
 const player1AI = false; // x
-const player2AI = false; // O
+const player2AI = true; // O
 
 var turn = "X";
 var globalWinner = false;
@@ -12,10 +12,10 @@ const turnObj = {
     O: "X"
 }
 
-const height = 5;
-const width = 5;
+const height = 6;
+const width = 6;
 
-const maxDepth = 6;
+const maxDepth = 4;
 
 var round = 1;
 
@@ -70,7 +70,7 @@ function placePiece(index) {
 function placePieceAI() {
     let aiBoard = [];
     for (let i = 0; i < height * width; i++) {
-        aiBoard[i] = " ";
+        aiBoard[i] = `${board[i]}`;
     }
 
     let then = new Date();
@@ -79,15 +79,13 @@ function placePieceAI() {
     console.log(now - then + "ms");
 
     drawSimbol(turn, bestMove.index);
+    round++;
     turn = turnObj[turn];
 }
 
 function minimax(aiBoard, turn, depth, alpha, beta) {
-
+    if(depth == 0) console.log(aiBoard)
     var win = chceckForWin(aiBoard)
-    var depthOffset = Math.floor((1 - (emptySquares(board) / (width * height))))
-    if (depth == 0)
-        console.log(depthOffset)
     if (win == "O") {
         return { score: width * height - depth };
     }
@@ -96,17 +94,15 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
         return { score: -(width * height) + depth };
     }
 
-    else if (win == "T" || depth >= maxDepth + depthOffset) {
+    else if (win == "T" || depth >= maxDepth) {
         return { score: 0 };
     }
 
     var moves = [];
-    var penalty = 0;
-    for (let i = 0; i < width; i++) {
+    for (let i = 0; i < width * height; i++) {
         if (aiBoard[i] == " ") {
-
             var move = {};
-            move.index = [i];
+            move.index = i;
             aiBoard[i] = turn;
             round++;
 
@@ -148,7 +144,7 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
             if (moves[i].score > bestScore) {
                 bestScore = moves[i].score;
                 bestMove = i;
-                moves[bestMove].score += penalty;
+                moves[bestMove].score;
 
             }
         }
@@ -158,7 +154,7 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
             if (moves[i].score < bestScore) {
                 bestScore = moves[i].score;
                 bestMove = i;
-                moves[bestMove].score += penalty;
+                moves[bestMove].score;
             }
         }
     }
@@ -185,37 +181,50 @@ function drawSimbol(simbol, index) {
     }
 }
 
+//pridat ze checkuje jenom kolem nove pridaneho X/O
+
 function chceckForWin(boardTemp) {
     if (round < 9) return false;
     var winner = false;
 
-
     for (let i = 0; i < boardTemp.length; i++) {
-
         //vertical
 
         // 4*width protoze 5 je na win -> zmenit kdyz je vice in row to win
         if (i + 4 * width < width * height && isEqual(boardTemp[i], boardTemp[i + width], boardTemp[i + 2 * width], boardTemp[i + 3 * width], boardTemp[i + 4 * width])) {
-            winner = boardTemp[i];
+            winner = `${boardTemp[i]}`;
         }
-
-        console.log(boardTemp[i], boardTemp[i + width], boardTemp[i + 2 * width], boardTemp[i + 3 * width], boardTemp[i + 4 * width])
 
         //horizontal
 
         // - 5 protoze 5 je na win
-        if (i % width <= width - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 1], boardTemp[i + 3], boardTemp[i + 4])) {
-            winner = boardTemp[i];
+        if (i % width <= width - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 2], boardTemp[i + 3], boardTemp[i + 4])) {
+            winner = `${boardTemp[i]}`;
         }
 
         //diagonal
-        if (isEqual(boardTemp[i], boardTemp[i + width + 1], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 3], boardTemp[i + (4 * width) + 4])) {
-            winner = boardTemp[i];
+
+        if(i + 4 * width < width * height && i % width <= width - 5) {
+
+            //left -> right
+
+            if (isEqual(boardTemp[i], boardTemp[i + width + 1], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 3], boardTemp[i + (4 * width) + 4])) {
+                winner = `${boardTemp[i]}`;
+            }
+
+            //right -> left
+
+            if (isEqual(boardTemp[i + 4], boardTemp[i + width + 3], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 1], boardTemp[i + (4 * width)])) {
+                winner = `${boardTemp[i + 4]}`;
+            }
         }
 
-        if (isEqual(boardTemp[i + 4], boardTemp[i + width + 3], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 1], boardTemp[i + (4 * width)])) {
-            winner = boardTemp[i + 4];
-        }
+
+
+
+        /*cell = document.getElementById(`${i}`);
+        console.log(cell)
+        cell.style.backgroundColor = "red";*/
 
     }
 
