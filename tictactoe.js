@@ -83,10 +83,14 @@ function placePieceAI() {
     turn = turnObj[turn];
 }
 
-function minimax(aiBoard, turn, depth, alpha, beta) {
-    if(depth == 0) console.log(aiBoard)
+function minimax(aiBoard, turn, depth) {
+    if (depth == 0) console.log(aiBoard)
     var win = chceckForWin(aiBoard)
-    if (win == "O") {
+    if (win == "T" || depth >= Math.ceil(Math.min(maxDepth, (height * width - emptySquares(board)) / 2))) {
+        return { score: 0 };
+    }
+
+    else if (win == "O") {
         return { score: width * height - depth };
     }
 
@@ -94,9 +98,7 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
         return { score: -(width * height) + depth };
     }
 
-    else if (win == "T" || depth >= maxDepth) {
-        return { score: 0 };
-    }
+    if (depth == 0) console.log(Math.ceil(Math.min(maxDepth, (height * width - emptySquares(board)) / 2)))
 
     var moves = [];
     for (let i = 0; i < width * height; i++) {
@@ -107,27 +109,14 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
             round++;
 
             if (turn == "O") {  //maximizing
-                var result = minimax(aiBoard, "X", depth + 1, alpha, beta);
+                var result = minimax(aiBoard, "X", depth + 1);
 
                 move.score = result.score;
-
-                if (alpha > beta) {
-                    break;
-                }
-
-                alpha = Math.max(result, alpha);
-
             }
             else {  //minimizing
-                var result = minimax(aiBoard, "O", depth + 1, alpha, beta);
+                var result = minimax(aiBoard, "O", depth + 1);
 
                 move.score = result.score;
-
-                if (beta < alpha) {
-                    break;
-                }
-
-                beta = Math.min(result, beta);
             }
 
             aiBoard[i] = " ";
@@ -145,7 +134,13 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
                 bestScore = moves[i].score;
                 bestMove = i;
                 moves[bestMove].score;
-
+            }
+            else if (moves[i].score == bestScore) {
+                if (Math.random() > 0.85) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                    moves[bestMove].score;
+                }
             }
         }
     } else {
@@ -155,6 +150,13 @@ function minimax(aiBoard, turn, depth, alpha, beta) {
                 bestScore = moves[i].score;
                 bestMove = i;
                 moves[bestMove].score;
+            }
+            else if (moves[i].score == bestScore) {
+                if (Math.random() > 0.85) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                    moves[bestMove].score;
+                }
             }
         }
     }
@@ -204,7 +206,7 @@ function chceckForWin(boardTemp) {
 
         //diagonal
 
-        if(i + 4 * width < width * height && i % width <= width - 5) {
+        if (i + 4 * width < width * height && i % width <= width - 5) {
 
             //left -> right
 
