@@ -2,7 +2,7 @@
 // https://cdn-icons-png.flaticon.com/512/105/105152.png
 
 const player1AI = false; // x
-const player2AI = false; // O
+const player2AI = true; // O
 
 var turn = "X";
 var globalWinner = false;
@@ -12,8 +12,10 @@ const turnObj = {
     O: "X"
 }
 
-const height = 6;
+const height = 5;
 const width = 5;
+
+
 
 const maxDepth = 5;
 
@@ -134,6 +136,13 @@ function minimax(aiBoard, turn, depth) {
                 bestMove = i;
                 moves[bestMove].score;
             }
+            else if (moves[i].score == bestScore) {
+                if (Math.random() > 0.80) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                    moves[bestMove].score;
+                }
+            }
         }
     } else {
         var bestScore = Infinity;
@@ -142,6 +151,13 @@ function minimax(aiBoard, turn, depth) {
                 bestScore = moves[i].score;
                 bestMove = i;
                 moves[bestMove].score;
+            }
+            else if (moves[i].score == bestScore) {
+                if (Math.random() > 0.90) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                    moves[bestMove].score;
+                }
             }
         }
     }
@@ -171,7 +187,7 @@ function drawSimbol(simbol, index) {
 //pridat ze checkuje jenom kolem nove pridaneho X/O
 
 function chceckForWin(boardTemp) {
-    //if (round < 9) return false;
+    if (round < 9) return false;
     var winner = false;
 
     for (let i = 0; i < boardTemp.length; i++) {
@@ -188,7 +204,7 @@ function chceckForWin(boardTemp) {
         if (i % height <= height - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 2], boardTemp[i + 3], boardTemp[i + 4])) {
             winner = `${boardTemp[i]}`;
         }
-        
+
         //diagonal
 
         if (i + 4 * width < width * height && i % height <= height - 5) {
