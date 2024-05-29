@@ -2,7 +2,7 @@
 // https://cdn-icons-png.flaticon.com/512/105/105152.png
 
 const player1AI = false; // x
-const player2AI = true; // O
+const player2AI = false; // O
 
 var turn = "X";
 var globalWinner = false;
@@ -13,7 +13,7 @@ const turnObj = {
 }
 
 const height = 6;
-const width = 6;
+const width = 5;
 
 const maxDepth = 5;
 
@@ -171,7 +171,7 @@ function drawSimbol(simbol, index) {
 //pridat ze checkuje jenom kolem nove pridaneho X/O
 
 function chceckForWin(boardTemp) {
-    if (round < 9) return false;
+    //if (round < 9) return false;
     var winner = false;
 
     for (let i = 0; i < boardTemp.length; i++) {
@@ -188,20 +188,20 @@ function chceckForWin(boardTemp) {
         if (i % height <= height - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 2], boardTemp[i + 3], boardTemp[i + 4])) {
             winner = `${boardTemp[i]}`;
         }
-
+        
         //diagonal
 
-        if (i + 4 * width < width * height && i % width <= width - 5) {
+        if (i + 4 * width < width * height && i % height <= height - 5) {
 
             //left -> right
 
-            if (isEqual(boardTemp[i], boardTemp[i + width + 1], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 3], boardTemp[i + (4 * width) + 4])) {
+            if (isEqual(boardTemp[i], boardTemp[i + height + 1], boardTemp[i + (2 * height) + 2], boardTemp[i + (3 * height) + 3], boardTemp[i + (4 * height) + 4])) {
                 winner = `${boardTemp[i]}`;
             }
 
             //right -> left
 
-            if (isEqual(boardTemp[i + 4], boardTemp[i + width + 3], boardTemp[i + (2 * width) + 2], boardTemp[i + (3 * width) + 1], boardTemp[i + (4 * width)])) {
+            if (isEqual(boardTemp[i + 4], boardTemp[i + height + 3], boardTemp[i + (2 * height) + 2], boardTemp[i + (3 * height) + 1], boardTemp[i + (4 * height)])) {
                 winner = `${boardTemp[i + 4]}`;
             }
         }
@@ -210,7 +210,6 @@ function chceckForWin(boardTemp) {
 
 
         /*cell = document.getElementById(`${i}`);
-        console.log(cell)
         cell.style.backgroundColor = "red";*/
 
     }
