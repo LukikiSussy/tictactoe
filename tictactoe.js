@@ -15,12 +15,9 @@ const turnObj = {
 const height = 6;
 const width = 6;
 
-const maxDepth = 4;
+const maxDepth = 5;
 
 var round = 1;
-
-
-const penaltyAdd = Math.round(Math.sqrt(height) * Math.sqrt(width)) / 2;
 
 var board = [];
 for (let i = 0; i < height * width; i++) {
@@ -32,10 +29,10 @@ for (let y = 0; y < height; y++) {
     let row = document.createElement("tr");
     for (let x = 0; x < width; x++) {
         let cell = document.createElement("td");
-        cell.id = `${y * height + x}`;
+        cell.id = `${x * height + y}`;
         cell.classList.add("cell");
         cell.onclick = function () {
-            placePiece(`${y * height + x}`)
+            placePiece(`${x * height + y}`)
         }
         row.appendChild(cell);
     }
@@ -63,7 +60,7 @@ function placePiece(index) {
         game();
     }
     else {
-        console.log(index)
+        console.log(index, board[index])
     }
 }
 
@@ -86,7 +83,7 @@ function placePieceAI() {
 function minimax(aiBoard, turn, depth) {
     if (depth == 0) console.log(aiBoard)
     var win = chceckForWin(aiBoard)
-    if (win == "T" || depth >= Math.ceil(Math.min(maxDepth, (height * width - emptySquares(board)) / 2))) {
+    if (win == "T" || depth >= maxDepth) {
         return { score: 0 };
     }
 
@@ -97,8 +94,6 @@ function minimax(aiBoard, turn, depth) {
     else if (win == "X") {
         return { score: -(width * height) + depth };
     }
-
-    if (depth == 0) console.log(Math.ceil(Math.min(maxDepth, (height * width - emptySquares(board)) / 2)))
 
     var moves = [];
     for (let i = 0; i < width * height; i++) {
@@ -122,6 +117,10 @@ function minimax(aiBoard, turn, depth) {
             aiBoard[i] = " ";
             round--;
 
+            if(depth == 0) {
+                cell = document.getElementById(`${i}`);
+                cell.innerHTML = move.score;
+            }
             moves.push(move);
         }
     }
@@ -135,13 +134,6 @@ function minimax(aiBoard, turn, depth) {
                 bestMove = i;
                 moves[bestMove].score;
             }
-            else if (moves[i].score == bestScore) {
-                if (Math.random() > 0.85) {
-                    bestScore = moves[i].score;
-                    bestMove = i;
-                    moves[bestMove].score;
-                }
-            }
         }
     } else {
         var bestScore = Infinity;
@@ -150,13 +142,6 @@ function minimax(aiBoard, turn, depth) {
                 bestScore = moves[i].score;
                 bestMove = i;
                 moves[bestMove].score;
-            }
-            else if (moves[i].score == bestScore) {
-                if (Math.random() > 0.85) {
-                    bestScore = moves[i].score;
-                    bestMove = i;
-                    moves[bestMove].score;
-                }
             }
         }
     }
@@ -190,17 +175,17 @@ function chceckForWin(boardTemp) {
     var winner = false;
 
     for (let i = 0; i < boardTemp.length; i++) {
-        //vertical
+        //horizontal
 
         // 4*width protoze 5 je na win -> zmenit kdyz je vice in row to win
-        if (i + 4 * width < width * height && isEqual(boardTemp[i], boardTemp[i + width], boardTemp[i + 2 * width], boardTemp[i + 3 * width], boardTemp[i + 4 * width])) {
+        if (i + 4 * width < width * height && isEqual(boardTemp[i], boardTemp[i + height], boardTemp[i + 2 * height], boardTemp[i + 3 * height], boardTemp[i + 4 * height])) {
             winner = `${boardTemp[i]}`;
         }
 
-        //horizontal
+        //vertical
 
         // - 5 protoze 5 je na win
-        if (i % width <= width - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 2], boardTemp[i + 3], boardTemp[i + 4])) {
+        if (i % height <= height - 5 && isEqual(boardTemp[i], boardTemp[i + 1], boardTemp[i + 2], boardTemp[i + 3], boardTemp[i + 4])) {
             winner = `${boardTemp[i]}`;
         }
 
