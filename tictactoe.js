@@ -83,8 +83,8 @@ function placePieceAI() {
 }
 
 function minimax(aiBoard, turn, depth) {
-    if (depth == 0) console.log(aiBoard)
-    var win = chceckForWin(aiBoard)
+    var win = chceckForWin(aiBoard);
+
     if (win == "T" || depth >= maxDepth) {
         return { score: 0 };
     }
@@ -101,6 +101,7 @@ function minimax(aiBoard, turn, depth) {
     for (let i = 0; i < width * height; i++) {
         if (aiBoard[i] == " ") {
             var move = {};
+
             move.index = i;
             aiBoard[i] = turn;
             round++;
@@ -114,6 +115,11 @@ function minimax(aiBoard, turn, depth) {
                 var result = minimax(aiBoard, "O", depth + 1);
 
                 move.score = result.score;
+            }
+
+            if(depth == 0) {
+                var adjacent = noOfAdjacent(turn, aiBoard, i);
+                move.score += adjacent;
             }
 
             aiBoard[i] = " ";
@@ -153,7 +159,7 @@ function minimax(aiBoard, turn, depth) {
                 moves[bestMove].score;
             }
             else if (moves[i].score == bestScore) {
-                if (Math.random() > 0.90) {
+                if (Math.random() > 0.95) {
                     bestScore = moves[i].score;
                     bestMove = i;
                     moves[bestMove].score;
@@ -163,6 +169,16 @@ function minimax(aiBoard, turn, depth) {
     }
 
     return moves[bestMove];
+}
+
+function noOfAdjacent(turn, board, index) {
+    var a = 0;
+    if (index + 1 <= width * height && (index) % height != 0) if (board[index + 1] == turn) a++;
+    if (index - 1 <= width * height && (index) % height != 0) if (board[index - 1] == turn) a++;
+    if (index + height <= width * height) if (board[index + height] == turn) a++;
+    if (index - height <= width * height) if (board[index - height] == turn) a++;
+
+    return a;
 }
 
 function drawSimbol(simbol, index) {
